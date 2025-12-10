@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -65,4 +67,16 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
+
+    // ROOM com KSP
+    val room_version = "2.8.4"
+
+    // 1. Core Room library
+    implementation("androidx.room:room-runtime:$room_version")
+
+    // 2. Kotlin Extensions and Coroutines support (Recomendado)
+    implementation("androidx.room:room-ktx:$room_version")
+
+    // 3. Annotation Processor (KSP)
+    ksp("androidx.room:room-compiler:$room_version")
 }
