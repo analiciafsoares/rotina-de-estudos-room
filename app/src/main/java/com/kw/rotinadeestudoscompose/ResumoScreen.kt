@@ -6,23 +6,29 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kw.rotinadeestudoscompose.viewmodel.RotinaViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ResumoScreen(onBackClick: () -> Unit) {
-    val resumo = buildString {
+fun ResumoScreen(
+    viewModel: RotinaViewModel,
+    onBackClick: () -> Unit
+) {
+    val resumo by viewModel.resumo.collectAsState(initial = emptyMap())
+
+    val total = resumo.values.sum()
+
+    val textoResumo = buildString {
         append("Resumo semanal:\n\n")
-        var total = 0
-        Repository.rotina.forEach { (dia, lista) ->
-            append("$dia: ${lista.size} tarefa(s)\n")
-            total += lista.size
+        resumo.forEach { (dia, qtd) ->
+            append("$dia: $qtd atividade(s)\n")
         }
-        append("\nTotal de tarefas na semana: $total")
+        append("\nTotal: $total atividade(s)")
     }
 
     Scaffold(
@@ -62,7 +68,7 @@ fun ResumoScreen(onBackClick: () -> Unit) {
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Text(
-                    text = resumo,
+                    text = textoResumo,
                     modifier = Modifier.padding(16.dp),
                     fontSize = 18.sp,
                     lineHeight = 24.sp

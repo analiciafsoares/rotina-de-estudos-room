@@ -8,53 +8,58 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.kw.rotinadeestudoscompose.data.RotinaDatabase
+import com.kw.rotinadeestudoscompose.data.RotinaRepository
 import com.kw.rotinadeestudoscompose.ui.theme.RotinaDeEstudosComposeTheme
+import com.kw.rotinadeestudoscompose.viewmodel.RotinaViewModel
+import com.kw.rotinadeestudoscompose.viewmodel.RotinaViewModelFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val db = RotinaDatabase.getDatabase(this)
+        val repo = RotinaRepository(db.atividadeDao())
+        val factory = RotinaViewModelFactory(repo)
+        val viewModel = ViewModelProvider(this, factory)[RotinaViewModel::class.java]
+
         setContent {
             RotinaDeEstudosComposeTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    RotinaApp()
-                }
+                RotinaApp(viewModel)
             }
         }
     }
 }
 
 @Composable
-fun RotinaApp() {
+fun RotinaApp(viewModel: RotinaViewModel) {
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = "main") {
         composable("main") {
-            MainScreen(onDiaClick = { dia ->
+            MainScreen { dia ->
                 navController.navigate("dia/$dia")
-            })
+            }
         }
-        composable("dia/{dia}") { backStackEntry ->
-            val dia = backStackEntry.arguments?.getString("dia") ?: ""
+
+        composable("dia/{dia}") {
             DiaScreen(
-                dia = dia,
-                onResumoClick = {
-                    navController.navigate("resumo")
-                },
-                onBackClick = {
-                    navController.popBackStack()
-                }
+                dia = it.arguments?.getString("dia") ?: "",
+                viewModel = viewModel,
+                onResumoClick = { navController.navigate("resumo") },
+                onBackClick = { navController.popBackStack() }
             )
         }
+
         composable("resumo") {
-            ResumoScreen(onBackClick = {
+            ResumoScreen(viewModel) {
                 navController.popBackStack()
-            })
+            }
         }
     }
 }
+
