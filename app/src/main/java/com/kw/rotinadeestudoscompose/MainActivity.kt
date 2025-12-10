@@ -22,6 +22,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Cria o banco, o repository e a ViewModel
         val db = RotinaDatabase.getDatabase(this)
         val repo = RotinaRepository(db.atividadeDao())
         val factory = RotinaViewModelFactory(repo)
@@ -36,17 +37,19 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun RotinaApp(viewModel: RotinaViewModel) {
+fun RotinaApp(viewModel: RotinaViewModel) { //Define a navegação entre telas usando Navigation Compose (NavHost / composable)
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = "main") {
         composable("main") {
+            // lista de dias da semana.
             MainScreen { dia ->
                 navController.navigate("dia/$dia")
             }
         }
 
         composable("dia/{dia}") {
+            // para ver/adicionar/editar/deletar atividades de um dia específico
             DiaScreen(
                 dia = it.arguments?.getString("dia") ?: "",
                 viewModel = viewModel,
@@ -56,6 +59,7 @@ fun RotinaApp(viewModel: RotinaViewModel) {
         }
 
         composable("resumo") {
+            // mostra um resumo de quantas atividades há por dia e total da semana
             ResumoScreen(viewModel) {
                 navController.popBackStack()
             }

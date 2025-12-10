@@ -27,9 +27,12 @@ fun DiaScreen(
     onResumoClick: () -> Unit,
     onBackClick: () -> Unit
 ) {
+    // Coleta da lista de atividades para o dia — observa o Flow da ViewModel.
     val lista by viewModel.atividadesPorDia(dia).collectAsState(initial = emptyList())
 
+    // Estado local: se deve mostrar o diálogo de adicionar atividade
     var showAddDialog by remember { mutableStateOf(false) }
+    // Estado local: se há uma atividade selecionada para edição
     var atividadeParaEdicao by remember { mutableStateOf<Atividade?>(null) }
 
     Scaffold(
@@ -60,6 +63,7 @@ fun DiaScreen(
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
+            // Lista de atividades em LazyColumn
             LazyColumn(
                 modifier = Modifier
                     .weight(1f)
@@ -67,8 +71,8 @@ fun DiaScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(
-                    items = lista,
-                    key = { it.id }
+                    items = lista, // dados que vêm da ViewModel
+                    key = { it.id } // chave única para cada item
                 ) { item ->
                     Card(
                         modifier = Modifier.fillMaxWidth(),
@@ -80,6 +84,7 @@ fun DiaScreen(
                                 .padding(horizontal = 8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
+                            // Mostra a descrição da atividade
                             Text(
                                 text = item.descricao,
                                 modifier = Modifier
@@ -88,7 +93,7 @@ fun DiaScreen(
                                 fontSize = 16.sp
                             )
 
-                            // 1. BOTÃO DE EDITAR
+                            // 1. BOTÃO DE EDITAR: ao clicar, define atividadeParaEdicao = item
                             IconButton(onClick = {
                                 atividadeParaEdicao = item
                             }) {
@@ -99,7 +104,7 @@ fun DiaScreen(
                                 )
                             }
 
-                            // 2. BOTÃO DE DELETAR
+                            // 2. BOTÃO DE DELETAR: chama viewModel.deletar(item)
                             IconButton(onClick = {
                                 viewModel.deletar(item)
                             }) {
@@ -116,6 +121,7 @@ fun DiaScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Botões de ação: "Adicionar" e "Resumo"
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -137,6 +143,7 @@ fun DiaScreen(
         }
     }
 
+    // Se showAddDialog for true, exibe diálogo para adicionar atividade.
     if (showAddDialog) {
         AddMateriaDialog(
             onDismiss = { showAddDialog = false },
@@ -147,6 +154,7 @@ fun DiaScreen(
         )
     }
 
+    // Se atividadeParaEdicao não for nulo, exibe diálogo de edição.
     atividadeParaEdicao?.let { atividade ->
         EditMateriaDialog(
             atividade = atividade,
@@ -162,15 +170,16 @@ fun DiaScreen(
 
 @Composable
 fun AddMateriaDialog(
-    onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit
+    onDismiss: () -> Unit, //Função chamada quando o usuário fecha o diálogo
+    onConfirm: (String) -> Unit //Função chamada quando o usuário confirma e envia o texto
 ) {
-    var text by remember { mutableStateOf("") }
+    var text by remember { mutableStateOf("") } // Usado para manter o estado do texto digitado
 
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = onDismiss, // /Fecha o diálogo ao clicar fora ou apertar "voltar"
         title = { Text("Adicionar matéria") },
         text = {
+            // Campo de texto onde o usuário digita a nova atividade
             OutlinedTextField(
                 value = text,
                 onValueChange = { text = it },
@@ -181,13 +190,14 @@ fun AddMateriaDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-                    if (text.isNotBlank()) onConfirm(text.trim())
+                    if (text.isNotBlank()) onConfirm(text.trim()) // Chama onConfirm somente se o texto no for vazio
                 }
             ) {
                 Text("Adicionar")
             }
         },
         dismissButton = {
+            // Permite cancelar (onDimiss) e fecha o diálogo
             TextButton(onClick = onDismiss) {
                 Text("Cancelar")
             }
@@ -197,10 +207,11 @@ fun AddMateriaDialog(
 
 @Composable
 fun EditMateriaDialog(
-    atividade: Atividade,
+    atividade: Atividade, // Atividade a ser editada
     onDismiss: () -> Unit,
     onConfirm: (String) -> Unit
 ) {
+    // Estado inicial já começa com o texto da atividade
     var text by remember { mutableStateOf(atividade.descricao) }
 
     AlertDialog(
@@ -209,7 +220,7 @@ fun EditMateriaDialog(
         text = {
             OutlinedTextField(
                 value = text,
-                onValueChange = { text = it },
+                onValueChange = { text = it },  // Atualiza o campo conforme o usuário digita
                 label = { Text("Formato: Matéria - HH:MM") },
                 modifier = Modifier.fillMaxWidth()
             )

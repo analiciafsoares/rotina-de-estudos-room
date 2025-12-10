@@ -52,7 +52,7 @@ fun MainScreen(onDiaClick: (String) -> Unit) {
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { onDiaClick(dia) },
+                        .clickable { onDiaClick(dia) }, // ao clicar vai para a tela do dia
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Text(

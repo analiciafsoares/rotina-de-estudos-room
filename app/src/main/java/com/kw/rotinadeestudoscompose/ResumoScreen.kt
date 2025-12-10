@@ -19,10 +19,13 @@ fun ResumoScreen(
     viewModel: RotinaViewModel,
     onBackClick: () -> Unit
 ) {
+    // Coleta o resumo (Flow<Map<String, Int>>) da ViewModel
     val resumo by viewModel.resumo.collectAsState(initial = emptyMap())
 
+    // Soma total de atividades
     val total = resumo.values.sum()
 
+    // Gera uma string textual com o resumo por dia + total
     val textoResumo = buildString {
         append("Resumo semanal:\n\n")
         resumo.forEach { (dia, qtd) ->
